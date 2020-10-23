@@ -27,12 +27,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 CShiftPWM::CShiftPWM() :   // Constants are set in initializer list
 
-	m_latchPin(h_latchPin) , 
-	m_dataPin(h_dataPin) , 
-	m_clockPin(h_clockPin) 
-    
+	m_latchPin(h_latchPin) ,
+	m_dataPin(h_dataPin) ,
+	m_clockPin(h_clockPin)
+
 {
-									  
+
 	m_maxBrightness = 0;
 	m_counter = 0;
 	m_pinGrouping = 1; // Default = RGBRGBRGB... PinGrouping = 3 means: RRRGGGBBBRRRGGGBBB...
@@ -40,7 +40,7 @@ CShiftPWM::CShiftPWM() :   // Constants are set in initializer list
 	m_amountOfRegisters = h_amountOfRegisters;
 	m_amountOfOutputs = h_amountOfOutputs;
 	m_PWMValues = h_PWMValues;							// The actual storage is allocated in ShiftPWM.h as h_PWMValues
-		
+
 }
 
 CShiftPWM::~CShiftPWM() {
@@ -223,35 +223,27 @@ void CShiftPWM::Start(int ledFrequency, unsigned char maxBrightness){
 
 	digitalWrite(m_clockPin, LOW);
 	digitalWrite(m_dataPin, LOW);
-	
+
 	m_irqPrescaler = (ledFrequency / 1000)+1;		// We are running off the 1ms interrupt. +1 becuase we pre-increment inside the ISR
-		
-	// Enable a match interrupt on Timer0 which is already running at 1KHz for the Arduino time functions
-	// This trick lifted from....
-	// https://learn.adafruit.com/multi-tasking-the-arduino-part-2/timers
-	
-	// enable timer 0 compare match interrupt
-	// portable definitions taken from...
-	// https://github.com/arduino/Arduino/blob/master/hardware/arduino/avr/cores/arduino/wiring.c
-	
-	#if defined(TIMSK) && defined(TOIE0)
-		bitSet(TIMSK, OCIE0A);
-	#elif defined(TIMSK0) && defined(TOIE0)
-		bitSet(TIMSK0, OCIE0A);
+
+
+	#if defined(TIMSK)
+	  TCCR1 |= (1 << CTC1); // we shall clear the timer on compare match
+    TCCR1 |= (1 << CS12) | (1 << CS11) | (1 << CS10); // set the clock prescaler to 64
+    OCR1C = 10; // compare match value
+		TIMSK |= (1 << OCIE1A); // enable compare match interrupt
 	#else
-		#error	Timer 0 overflow interrupt not set correctly
-	#endif	
+		#error	Timer 1 overflow interrupt not set correctly
+	#endif
 }
 
 void CShiftPWM::Stop(void) {
-	
-	// disable timer 0 compare match interrupt
-	#if defined(TIMSK) && defined(TOIE0)
-		bitClear(TIMSK, OCIE0A);
-	#elif defined(TIMSK0) && defined(TOIE0)
-		bitClear(TIMSK0, OCIE0A);
+
+	// disable timer 1 compare match interrupt
+	#if defined(TIMSK)
+		bitClear(TIMSK, OCIE1A);
 	#else
-		#error	Timer 0 overflow interrupt not set correctly
-	#endif	
-	
+		#error	Timer 1 overflow interrupt not set correctly
+	#endif
+
 }

@@ -1,9 +1,17 @@
-# ShiftPWM-Redux
-This is an Arduino Library for software PWM with shift registers based on the popular ShiftPWM library from Elco Jacobs.
+# ShiftPWM-Redux2
 
-DO NOT USE THIS LIBRARY, I CAN NOT SUPPORT IT. |
-----|
-If you are looking for a code compatible update to ShiftPWM that features 30% faster SPI performce, check out [this pull request](https://github.com/elcojacobs/ShiftPWM/pull/10) |
+This is an Arduino Library for software PWM with shift registers based on bigjosh's fork of the popular ShiftPWM library from Elco Jacobs. He basically managed to get ShiftPWM run on ATTINY based boards (I've included the original readme at the end of this one).
+
+Sadly he had to abandon the project, and that's, in it's current state won't really work. I've managed to fix it on an Attiny85, so you may use this in your projects!
+
+## This is purely a WIP fork, so take care!
+
+Currently on a board set to 1 MHz internal clock will have it's timer interrupt at a 0.6ms clock cycle. I've ran it with 2 registers and 5 RGB LEDs for hours without a problem, but I still have to tweak the values. It __may__ not handle other stuff while running.
+
+`I'll write more info in the future, and I try to update the code as well`
+
+## ShiftPWM-Redux
+This is an Arduino Library for software PWM with shift registers based on the popular ShiftPWM library from Elco Jacobs.
 
 This fork features following benefits over the original...
 
@@ -14,7 +22,7 @@ This fork features following benefits over the original...
 * General cleanup and simplifications over the codebase.
 
 
-##Changes to existing code
+## Changes to existing code
 
 *Old Code...*
 
@@ -52,11 +60,11 @@ const int ShiftPWM_latchPin = 8;
 const int ShiftPWM_dataPin  = 11;
 const int ShiftPWM_clockPin = 13;
 
-// The number of 8-bit shift registers connected 
+// The number of 8-bit shift registers connected
 const unsigned int ShiftPWM_numRegisters=5;       // The number of 8-bit shift registers connected
 
 // If your LED's turn on if the pin is low, set this to true, otherwise set it to fals
-const bool ShiftPWM_invertOutputs = false; 
+const bool ShiftPWM_invertOutputs = false;
 
 // You can enable the option below to shift the PWM phase of each shift register by 8 compared to the previous.
 // This will slightly increase the interrupt load, but will prevent all PWM signals from becoming high at the same time.

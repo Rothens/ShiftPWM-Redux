@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // These are all defined inside the header file so that we can statically allocate the memory for the values array
 // Because it s statically allocated, it will show up as memory used at compile time rather than sielently failing
-// if we run out of memory at run time. 
+// if we run out of memory at run time.
 
 const unsigned char h_amountOfRegisters = ShiftPWM_numRegisters;
 const int h_amountOfOutputs = h_amountOfRegisters*8;
@@ -65,27 +65,23 @@ static inline void pwm_output_one_pin(volatile uint8_t * const clockPort, volati
 // https://github.com/arduino/Arduino/blob/master/hardware/arduino/avr/cores/arduino/wiring.c
 
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-ISR(TIM0_COMPA_vect)
-#else
-ISR(TIMER0_COMPA_vect)
-#endif
-	
+ISR(TIMER1_COMPA_vect)
+
 	{
-		
+
 	volatile static unsigned char skipCounter=1;			// Always run the 1st pass though
-	
+
 	if (--skipCounter == 0 ) {					// Should we run this pass?
-				
+
 		skipCounter = ShiftPWM.m_irqPrescaler;	// Reset for next time
-		
+
 		volatile static unsigned char semaphore = 0;		// Don't step on ourselves
-		
+
 		if (!semaphore) {
-			
+
 			semaphore=1;
-	
-	
+
+
 			sei(); //enable interrupt nesting to prevent disturbing other interrupt functions (servo's for example).
 
 			// Look up which bit of which output register corresponds to the pin.
@@ -102,17 +98,17 @@ ISR(TIMER0_COMPA_vect)
 			volatile uint8_t * const clockPort = port_to_output_PGM_ct[digital_pin_to_port_PGM_ct[ShiftPWM_clockPin]];
 			volatile uint8_t * const dataPort  = port_to_output_PGM_ct[digital_pin_to_port_PGM_ct[ShiftPWM_dataPin]];
 			const uint8_t clockBit =  digital_pin_to_bit_PGM_ct[ShiftPWM_clockPin];
-			const uint8_t dataBit =   digital_pin_to_bit_PGM_ct[ShiftPWM_dataPin];   
+			const uint8_t dataBit =   digital_pin_to_bit_PGM_ct[ShiftPWM_dataPin];
 
-			// Define a pointer that will be used to access the values for each output. 
+			// Define a pointer that will be used to access the values for each output.
 			// Start it one past the last value, because it is decreased before it is used.
 
 			unsigned char * ledPtr= ShiftPWM.m_PWMValues + ShiftPWM.m_amountOfOutputs;
 
-			// Write shift register latch clock low 
+			// Write shift register latch clock low
 			bitClear(*latchPort, latchBit);
 			unsigned char counter = ShiftPWM.m_counter;
-	
+
 			//Use port manipulation to send out all bits
 			for(unsigned char i = ShiftPWM.m_amountOfRegisters; i>0;--i){   // do one shift register at a time. This unrolls the loop for extra speed
 				if(ShiftPWM_balanceLoad){
@@ -140,11 +136,11 @@ ISR(TIMER0_COMPA_vect)
 				ShiftPWM.m_counter=0; // Reset counter if it maximum brightness has been reached
 			}
 
-			
+
 			semaphore=0;
 
 		}
-		
+
 	}
 }
 
